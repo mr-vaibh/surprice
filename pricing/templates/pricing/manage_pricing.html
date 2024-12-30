@@ -21,6 +21,18 @@
 <body class="bg-gray-50 font-sans text-gray-800 p-6">
 
     <div class="max-w-4xl mx-auto space-y-8">
+
+        <div class="flex justify-center items-center mt-3">
+            <div class="space-x-4">
+                <a href="/booking" class="px-6 py-3 bg-gray-100 text-gray-800 rounded-lg hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 transition duration-200">
+                    Bookings
+                </a>
+                <a href="/manage-pricing" class="px-6 py-3 bg-gray-800 text-white rounded-lg hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 transition duration-200">
+                  Sports
+                </a>
+            </div>
+          </div>
+
         <!-- Header -->
         <h1 class="text-3xl font-semibold text-center text-gray-900">Manage Sports Pricing</h1>
 
@@ -30,7 +42,8 @@
         </div>
 
         <!-- Sports Table -->
-        <table class="w-full table-auto">
+        <div class="w-full bg-white shadow-lg rounded-lg p-6">
+        <table class="w-full table-auto border border-separate ">
             <thead class="text-sm font-medium text-gray-600 bg-gray-200">
                 <col style="width:10%">
                 <col style="width:40%">
@@ -47,6 +60,7 @@
                 <!-- Dynamic Rows Here -->
             </tbody>
         </table>
+        </div>
 
         <!-- Modals -->
         <!-- Add Sport Modal -->

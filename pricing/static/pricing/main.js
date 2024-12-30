@@ -1,6 +1,6 @@
 $(document).ready(function () {
     const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
-    
+
     const btnClass = `bg-gray-700 text-white px-2 py-1 rounded-lg shadow-lg hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500 transition duration-200`
 
     // Load sports data into the table
@@ -20,7 +20,7 @@ $(document).ready(function () {
 
     // Create default pricings table
     function createPricingsTable(pricing) {
-        const tableHeader = `<table class="min-w-full table-auto"><col style="width:50%"><col style="width:50%"><tbody>`;
+        const tableHeader = `<table class="min-w-full table-auto border"><col style="width:50%"><col style="width:50%"><tbody>`;
         const tableFooter = `</tbody></table>`;
 
         return tableHeader + createPricingTableRow(pricing) + tableFooter;
@@ -44,7 +44,7 @@ $(document).ready(function () {
     // Create pricing override table
     function createOverrideTable(override) {
         const formattedPrice = formatOverridePrice(override);
-        const tableHeader = `<table class="min-w-full table-auto"><col style="width:50%"><col style="width:50%"><tbody>`;
+        const tableHeader = `<table class="min-w-full table-auto border"><col style="width:50%"><col style="width:50%"><tbody>`;
         const tableFooter = `</tbody></table>`;
 
         if (override.override_type === 'datetime') {
@@ -61,7 +61,7 @@ $(document).ready(function () {
         const price = parseFloat(override.price_modifier);
         const color = price < 0 ? 'red' : 'green';
         const sign = price < 0 ? '-' : '+';
-        return `${sign} <span style="color: ${color};">$${Math.abs(price).toFixed(2)}</span>`;
+        return `<span style="color: ${color};">${sign}$${Math.abs(price).toFixed(2)}</span>`;
     }
 
     // Create specific override rows
@@ -71,7 +71,7 @@ $(document).ready(function () {
         const endTime = new Date(`1970-01-01T${override.end_time}`).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
         return `<tr id="override-${override.id}">
-                    <td>On <b>${formattedDate}</b>, From <b>${startTime}</b> to <b>${endTime}</b></td>
+                    <td>On <b>${formattedDate}</b><br><b>${startTime}</b> to <b>${endTime}</b></td>
                     <td>${formattedPrice}</td>
                     <td><button class="${btnClass}" onclick="deleteOverride(${override.id})"><i class="fa-solid fa-trash"></i></button></td>
                 </tr>`;
@@ -84,7 +84,7 @@ $(document).ready(function () {
         const endTime = new Date(`1970-01-01T${override.end_time}`).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
         return `<tr id="override-${override.id}">
-                    <td>On <b>${dayName}</b>, From <b>${startTime}</b> to <b>${endTime}</b><b></td>
+                    <td>On <b>${dayName}</b><br><b>${startTime}</b> to <b>${endTime}</b><b></td>
                     <td>${formattedPrice}</td>
                     <td><button class="${btnClass}" onclick="deleteOverride(${override.id})"><i class="fa-solid fa-trash"></i></button></td>
                 </tr>`;
@@ -95,7 +95,7 @@ $(document).ready(function () {
         const endTime = new Date(`1970-01-01T${override.end_time}`).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
         return `<tr id="override-${override.id}">
-                    <td>Everyday From <b>${startTime}</b> to <b>${endTime}</b></td>
+                    <td>Everyday<br><b>${startTime}</b> to <b>${endTime}</b></td>
                     <td>${formattedPrice}</td>
                     <td><button class="${btnClass}" onclick="deleteOverride(${override.id})"><i class="fa-solid fa-trash"></i></button></td>
                 </tr>`;

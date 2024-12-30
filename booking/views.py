@@ -5,17 +5,22 @@ from pricing.models import Sport
 from .models import Booking
 from datetime import datetime
 
+def booking(request):
+    sports = Sport.objects.all()
+    bookings = Booking.objects.all()
+    return render(request, 'booking/create_booking.html', {'sports': sports, 'bookings': bookings})
+
 def create_booking(request):
     if request.method == 'POST':
         try:
             # Parse the JSON data from the request body
             data = json.loads(request.body.decode('utf-8'))
             
-            customer_name = data.get('customer_name', 'Anonymous')
-            sport_id = int(data.get('sport_id', None))
-            booking_datetime = data.get('booking_datetime', None)
-            duration = data.get('duration', None)
-            
+            customer_name = data['customer_name']
+            sport_id = data['sport_id']
+            booking_datetime = data['booking_datetime']
+            duration = data['duration']
+
             # Convert the booking_datetime string to a datetime object
             booking_datetime = datetime.strptime(booking_datetime, '%Y-%m-%dT%H:%M')
 
@@ -32,14 +37,15 @@ def create_booking(request):
             # Calculate the total price
             total_price = booking.calculate_total_price()
 
-            return JsonResponse({'total_price': total_price})
+            return JsonResponse({
+                'customer_name': booking.customer_name,
+                'sport_name': booking.sport.name,
+                'booking_datetime': booking.booking_datetime,
+                'duration': booking.duration,
+                'total_price': total_price,
+            })
 
         except json.JSONDecodeError:
             return JsonResponse({'error': 'Invalid JSON data'}, status=400)
         except Sport.DoesNotExist:
             return JsonResponse({'error': 'Sport not found'}, status=404)
-    
-    sports = Sport.objects.all()
-    bookings = Booking.objects.all()
-    return render(request, 'booking/create_booking.html', {'sports': sports, 'bookings': bookings})
-
