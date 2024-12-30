@@ -1,0 +1,157 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Sports Pricing</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+
+<body class="bg-gray-50 font-sans text-gray-800 p-6">
+
+    <div class="max-w-4xl mx-auto space-y-8">
+        <!-- Header -->
+        <h1 class="text-3xl font-semibold text-center text-gray-900">Manage Sports Pricing</h1>
+
+        <!-- Add Sport Button -->
+        <div class="text-center">
+            <button class="bg-gray-700 text-white px-6 py-2 rounded-lg shadow-lg hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500 transition duration-200" onclick="showAddSportModal()">+ Add New Sport</button>
+        </div>
+
+        <!-- Sports Table -->
+        <table class="w-full table-auto">
+            <thead class="text-sm font-medium text-gray-600 bg-gray-200">
+                <tr>
+                    <th class="px-6 py-4 text-left">Sport</th>
+                    <th class="px-6 py-4 text-left">Duration</th>
+                    <th class="px-6 py-4 text-left">Price</th>
+                    <th class="px-6 py-4 text-left">Price Overrides</th>
+                    <th class="px-6 py-4 text-left">Actions</th>
+                </tr>
+            </thead>
+            <tbody id="sportsTable" class="text-sm text-gray-700">
+                <!-- Dynamic Rows Here -->
+            </tbody>
+        </table>
+
+        <!-- Modals -->
+        <!-- Update Sport Modal -->
+        <div id="updateSportModal" class="hidden fixed inset-0 bg-gray-800 bg-opacity-50 flex justify-center items-center">
+            <div class="bg-white p-6 rounded-xl shadow-lg w-1/3">
+                <h2 class="text-xl font-semibold text-gray-900 mb-6">Update Sport</h2>
+                <form id="updateSportForm">
+                    {% csrf_token %}
+                    <input type="hidden" id="sportId">
+                    <label class="block mb-4">
+                        <span class="text-gray-700">Name</span>
+                        <input type="text" id="updateSportName" class="block w-full mt-2 p-3 border-0 rounded-lg shadow-sm bg-gray-100 text-gray-800 focus:ring-2 focus:ring-gray-500">
+                    </label>
+                    <label class="block mb-4">
+                        <span class="text-gray-700">Duration (minutes)</span>
+                        <input type="number" id="updateSportDuration" class="block w-full mt-2 p-3 border-0 rounded-lg shadow-sm bg-gray-100 text-gray-800 focus:ring-2 focus:ring-gray-500">
+                    </label>
+                    <label class="block mb-6">
+                        <span class="text-gray-700">Price</span>
+                        <input type="number" id="updateSportPrice" class="block w-full mt-2 p-3 border-0 rounded-lg shadow-sm bg-gray-100 text-gray-800 focus:ring-2 focus:ring-gray-500">
+                    </label>
+                    <div class="flex justify-end space-x-4">
+                        <button type="submit" class="bg-gray-700 text-white px-6 py-2 rounded-lg hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500 transition duration-200">Save</button>
+                        <button type="button" class="bg-gray-300 text-gray-700 px-6 py-2 rounded-lg hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 transition duration-200" onclick="closeModal('updateSportModal')">Cancel</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Add Sport Modal -->
+        <div id="addSportModal" class="hidden fixed inset-0 bg-gray-800 bg-opacity-50 flex justify-center items-center">
+            <div class="bg-white p-6 rounded-xl shadow-lg w-1/3">
+                <h2 class="text-xl font-semibold text-gray-900 mb-6">Add New Sport</h2>
+                <form id="addSportForm">
+                    {% csrf_token %}
+                    <label class="block mb-4">
+                        <span class="text-gray-700">Name</span>
+                        <input type="text" id="addSportName" class="block w-full mt-2 p-3 border-0 rounded-lg shadow-sm bg-gray-100 text-gray-800 focus:ring-2 focus:ring-gray-500">
+                    </label>
+                    <label class="block mb-4">
+                        <span class="text-gray-700">Duration (minutes)</span>
+                        <input type="number" id="addSportDuration" class="block w-full mt-2 p-3 border-0 rounded-lg shadow-sm bg-gray-100 text-gray-800 focus:ring-2 focus:ring-gray-500">
+                    </label>
+                    <label class="block mb-6">
+                        <span class="text-gray-700">Price</span>
+                        <input type="number" id="addSportPrice" class="block w-full mt-2 p-3 border-0 rounded-lg shadow-sm bg-gray-100 text-gray-800 focus:ring-2 focus:ring-gray-500">
+                    </label>
+                    <div class="flex justify-end space-x-4">
+                        <button type="submit" class="bg-gray-700 text-white px-6 py-2 rounded-lg hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500 transition duration-200">Add Sport</button>
+                        <button type="button" class="bg-gray-300 text-gray-700 px-6 py-2 rounded-lg hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 transition duration-200" onclick="closeModal('addSportModal')">Cancel</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Price Override Modal -->
+        <div id="priceOverrideModal" class="hidden fixed inset-0 bg-gray-800 bg-opacity-50 flex justify-center items-center">
+            <div class="bg-white p-6 rounded-xl shadow-lg w-1/3">
+                <h2 class="text-xl font-semibold text-gray-900 mb-6">Add Price Override</h2>
+                <form id="priceOverrideForm">
+                    {% csrf_token %}
+                    <input type="hidden" id="modalSportId">
+                    <label class="block mb-4">
+                        <span class="text-gray-700">Override Type</span>
+                        <select id="overrideType" class="block w-full mt-2 p-3 border-0 rounded-lg shadow-sm bg-gray-100 text-gray-800 focus:ring-2 focus:ring-gray-500">
+                            <option value="datetime">Date and Time</option>
+                            <option value="daytime">Day and Time</option>
+                            <option value="timeonly">Time of Day</option>
+                        </select>
+                    </label>
+
+                    <div id="datetimeFields" class="mb-4">
+                        <label class="block mb-2 text-gray-700">Date</label>
+                        <input type="date" id="datetimeDate" class="block w-full p-3 border-0 rounded-lg shadow-sm bg-gray-100 text-gray-800 focus:ring-2 focus:ring-gray-500 mb-4">
+                        <label class="block mb-2 text-gray-700">Start Time</label>
+                        <input type="time" id="datetimeStartTime" class="block w-full p-3 border-0 rounded-lg shadow-sm bg-gray-100 text-gray-800 focus:ring-2 focus:ring-gray-500 mb-4">
+                        <label class="block mb-2 text-gray-700">End Time</label>
+                        <input type="time" id="datetimeEndTime" class="block w-full p-3 border-0 rounded-lg shadow-sm bg-gray-100 text-gray-800 focus:ring-2 focus:ring-gray-500">
+                    </div>
+
+                    <div id="daytimeFields" class="hidden mb-4">
+                        <label class="block mb-2 text-gray-700">Day of the Week</label>
+                        <select id="daytimeDay" class="block w-full p-3 border-0 rounded-lg shadow-sm bg-gray-100 text-gray-800 focus:ring-2 focus:ring-gray-500">
+                            <option value="0">Sunday</option>
+                            <option value="1">Monday</option>
+                            <option value="2">Tuesday</option>
+                            <option value="3">Wednesday</option>
+                            <option value="4">Thursday</option>
+                            <option value="5">Friday</option>
+                            <option value="6">Saturday</option>
+                        </select>
+                    </div>
+
+                    <div id="timeonlyFields" class="hidden mb-4">
+                        <label class="block mb-2 text-gray-700">Start Time</label>
+                        <input type="time" id="timeonlyStartTime" class="block w-full p-3 border-0 rounded-lg shadow-sm bg-gray-100 text-gray-800 focus:ring-2 focus:ring-gray-500 mb-4">
+                        <label class="block mb-2 text-gray-700">End Time</label>
+                        <input type="time" id="timeonlyEndTime" class="block w-full p-3 border-0 rounded-lg shadow-sm bg-gray-100 text-gray-800 focus:ring-2 focus:ring-gray-500">
+                    </div>
+
+                    <label class="block mb-4">
+                        <span class="text-gray-700">Price Modifier</span>
+                        <input type="number" id="priceModifier" class="block w-full p-3 border-0 rounded-lg shadow-sm bg-gray-100 text-gray-800 focus:ring-2 focus:ring-gray-500">
+                    </label>
+
+                    <div class="flex justify-end space-x-4">
+                        <button type="submit" class="bg-gray-700 text-white px-6 py-2 rounded-lg hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500 transition duration-200">Save</button>
+                        <button type="button" class="bg-gray-300 text-gray-700 px-6 py-2 rounded-lg hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 transition duration-200" onclick="closeModal('priceOverrideModal')">Cancel</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="{% static 'pricing/main.js' %}"></script>
+</body>
+
+</html>
