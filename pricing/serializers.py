@@ -4,7 +4,7 @@ from .models import Sport, DefaultPricing, PricingOverride
 class DefaultPricingSerializer(serializers.ModelSerializer):
     class Meta:
         model = DefaultPricing
-        fields = ['id', 'duration', 'price']
+        fields = ['id', 'sport', 'duration', 'price']
 
 class PricingOverrideSerializer(serializers.ModelSerializer):
     class Meta:
@@ -15,7 +15,7 @@ class PricingOverrideSerializer(serializers.ModelSerializer):
         ]
 
 class SportSerializer(serializers.ModelSerializer):
-    default_pricing = DefaultPricingSerializer(required=False)
+    default_pricing = DefaultPricingSerializer(required=False, many=True)
     pricing_overrides = PricingOverrideSerializer(required=False, many=True)
 
     class Meta:

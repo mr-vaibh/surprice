@@ -1,5 +1,7 @@
 $(document).ready(function () {
     const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+    
+    const btnClass = `bg-gray-700 text-white px-2 py-1 rounded-lg shadow-lg hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500 transition duration-200`
 
     // Load sports data into the table
     function loadSports() {
@@ -8,6 +10,29 @@ $(document).ready(function () {
             tableBody.empty();
             data.forEach(sport => tableBody.append(createSportRow(sport)));
         }).fail(() => alert("Error loading sports."));
+    }
+
+    // Format default pricing
+    function formatDefaultPricings(pricings) {
+        if (!pricings || pricings.length === 0) return "No pricings";
+        return pricings.map(pricings => createPricingsTable(pricings)).join('');
+    }
+
+    // Create default pricings table
+    function createPricingsTable(pricing) {
+        const tableHeader = `<table class="min-w-full table-auto"><col style="width:50%"><col style="width:50%"><tbody>`;
+        const tableFooter = `</tbody></table>`;
+
+        return tableHeader + createPricingTableRow(pricing) + tableFooter;
+    }
+
+    // Create specific pricing rows
+    function createPricingTableRow(pricing) {
+        return `<tr id="pricing-${pricing.id}">
+                    <td>${pricing.duration}</td>
+                    <td>$${pricing.price}</td>
+                    <td><button class="${btnClass}" onclick="deletePricing(${pricing.id})"><i class="fa-solid fa-trash"></i></button></td>
+                </tr>`;
     }
 
     // Format pricing overrides
@@ -48,7 +73,7 @@ $(document).ready(function () {
         return `<tr id="override-${override.id}">
                     <td>On <b>${formattedDate}</b>, From <b>${startTime}</b> to <b>${endTime}</b></td>
                     <td>${formattedPrice}</td>
-                    <td><button class="bg-red-500 text-white px-2 py-1 rounded" onclick="deleteOverride(${override.id})">Delete</button></td>
+                    <td><button class="${btnClass}" onclick="deleteOverride(${override.id})"><i class="fa-solid fa-trash"></i></button></td>
                 </tr>`;
     }
 
@@ -59,7 +84,7 @@ $(document).ready(function () {
         return `<tr id="override-${override.id}">
                     <td>On <b>${dayName}</b></td>
                     <td>${formattedPrice}</td>
-                    <td><button class="bg-red-500 text-white px-2 py-1 rounded" onclick="deleteOverride(${override.id})">Delete</button></td>
+                    <td><button class="${btnClass}" onclick="deleteOverride(${override.id})"><i class="fa-solid fa-trash"></i></button></td>
                 </tr>`;
     }
 
@@ -70,19 +95,22 @@ $(document).ready(function () {
         return `<tr id="override-${override.id}">
                     <td>Everyday From <b>${startTime}</b> to <b>${endTime}</b></td>
                     <td>${formattedPrice}</td>
-                    <td><button class="bg-red-500 text-white px-2 py-1 rounded" onclick="deleteOverride(${override.id})">Delete</button></td>
+                    <td><button class="${btnClass}" onclick="deleteOverride(${override.id})"><i class="fa-solid fa-trash"></i></button></td>
                 </tr>`;
     }
 
     // Create sport row
     function createSportRow(sport) {
+        const defaultPricings = formatDefaultPricings(sport.default_pricing);
         const priceOverrides = formatPriceOverrides(sport.pricing_overrides);
         return `<tr id="sport-${sport.id}">
                     <td class="border px-4 py-2">${sport.name}</td>
-                    <td class="border px-4 py-2">${sport.default_pricing.duration || "N/A"}</td>
-                    <td class="border px-4 py-2">${sport.default_pricing.price || "N/A"}</td>
                     <td class="border px-4 py-2">
-                        <button class="bg-blue-500 text-white px-2 py-1 rounded" onclick="showAddOverrideModal(${sport.id})">+ Add Override</button>
+                        <button class="${btnClass}" onclick="showAddPricingModal(${sport.id})"><i class="fa-solid fa-plus"></i> </button>
+                        <div class="space-y-1">${defaultPricings}</div>
+                    </td>
+                    <td class="border px-4 py-2">
+                        <button class="${btnClass}" onclick="showAddOverrideModal(${sport.id})"><i class="fa-solid fa-plus"></i> </button>
                         <div class="space-y-1">${priceOverrides}</div>
                     </td>
                     <td class="border px-4 py-2">
@@ -91,6 +119,22 @@ $(document).ready(function () {
                     </td>
                 </tr>`;
     }
+
+    // Delete Default Price
+    window.deletePricing = function (priceId) {
+        $.ajax({
+            url: `/default-pricing/${priceId}/`,
+            method: "DELETE",
+            headers: { "X-CSRFToken": csrftoken },
+            success: function () {
+                $(`#pricing-${priceId}`).remove();
+                alert("Price deleted successfully!");
+            },
+            error: function () {
+                alert("Error deleting price.");
+            }
+        });
+    };
 
     // Delete Price Override
     window.deleteOverride = function (overrideId) {
@@ -142,12 +186,6 @@ $(document).ready(function () {
         const sportId = $("#sportId").val();
         const updatedData = {
             name: $("#updateSportName").val(),
-            default_pricing: {
-                sport: parseInt(sportId),
-                duration: $("#updateSportDuration").val(),
-                price: $("#updateSportPrice").val(),
-            },
-            pricing_overrides: []
         };
 
         $.ajax({
@@ -167,9 +205,48 @@ $(document).ready(function () {
         });
     });
 
+    // Show Add Default Pricing Modal
+    window.showAddPricingModal = function (sportId) {
+        $("#modalPriceSportId").val(sportId);
+        $("#defaultPricingModal").removeClass("hidden");
+    };
+
+    // Handle Add Default Pricing Form Submission
+    $("#defaultPricingForm").on("submit", function (e) {
+        e.preventDefault();
+
+        const sportId = $("#modalPriceSportId").val();
+        const pricingData = {
+            sport: parseInt(sportId),
+            duration: $("#durationDefault").val(),
+            price: $("#priceDefault").val()
+        };
+
+        addPricing(pricingData);
+    });
+
+    // Add price override
+    function addPricing(pricingData) {
+        $.ajax({
+            url: "/default-pricing/",
+            method: "POST",
+            contentType: "application/json",
+            headers: { "X-CSRFToken": csrftoken },
+            data: JSON.stringify(pricingData),
+            success: function () {
+                alert("Price added successfully!");
+                $("#defaultPricingModal").addClass("hidden");
+                loadSports();
+            },
+            error: function () {
+                alert("Error adding pricing.");
+            }
+        });
+    }
+
     // Show Add Price Override Modal
     window.showAddOverrideModal = function (sportId) {
-        $("#modalSportId").val(sportId);
+        $("#modalOverrideSportId").val(sportId);
         $("#priceOverrideModal").removeClass("hidden");
     };
 
@@ -177,7 +254,7 @@ $(document).ready(function () {
     $("#priceOverrideForm").on("submit", function (e) {
         e.preventDefault();
 
-        const sportId = $("#modalSportId").val();
+        const sportId = $("#modalOverrideSportId").val();
         const overrideData = {
             sport: parseInt(sportId),
             override_type: $("#overrideType").val(),
@@ -230,10 +307,6 @@ $(document).ready(function () {
 
         const newSportData = {
             name: $("#addSportName").val(),
-            default_pricing: {
-                duration: $("#addSportDuration").val(),
-                price: $("#addSportPrice").val()
-            },
         };
 
         $.ajax({

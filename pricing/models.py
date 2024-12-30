@@ -2,10 +2,9 @@ from django.db import models
 
 class Sport(models.Model):
     name = models.CharField(max_length=100)
-    price = models.DecimalField(max_digits=10, decimal_places=2)
 
 class DefaultPricing(models.Model):
-    sport = models.OneToOneField(Sport, on_delete=models.CASCADE, related_name='default_pricing')
+    sport = models.ForeignKey(Sport, on_delete=models.CASCADE, related_name='default_pricing')
     duration = models.IntegerField()  # Duration in minutes
     price = models.DecimalField(max_digits=10, decimal_places=2)
 
