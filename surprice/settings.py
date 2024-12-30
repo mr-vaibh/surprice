@@ -44,7 +44,7 @@ INSTALLED_APPS = [
 
     # User apps
     'pricing.apps.PricingConfig',
-
+    'booking.apps.BookingConfig',
 ]
 
 MIDDLEWARE = [

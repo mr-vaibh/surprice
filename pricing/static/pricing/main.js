@@ -80,9 +80,11 @@ $(document).ready(function () {
     function createDaytimeOverrideTable(override, formattedPrice) {
         const daysOfWeek = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
         const dayName = daysOfWeek[override.day_of_week];
+        const startTime = new Date(`1970-01-01T${override.start_time}`).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        const endTime = new Date(`1970-01-01T${override.end_time}`).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
         return `<tr id="override-${override.id}">
-                    <td>On <b>${dayName}</b></td>
+                    <td>On <b>${dayName}</b>, From <b>${startTime}</b> to <b>${endTime}</b><b></td>
                     <td>${formattedPrice}</td>
                     <td><button class="${btnClass}" onclick="deleteOverride(${override.id})"><i class="fa-solid fa-trash"></i></button></td>
                 </tr>`;
@@ -274,6 +276,8 @@ $(document).ready(function () {
             overrideData.end_time = $("#datetimeEndTime").val();
         } else if (overrideType === "daytime") {
             overrideData.day_of_week = $("#daytimeDay").val();
+            overrideData.start_time = $("#daytimeStartTime").val();
+            overrideData.end_time = $("#daytimeEndTime").val();
         } else if (overrideType === "timeonly") {
             overrideData.start_time = $("#timeonlyStartTime").val();
             overrideData.end_time = $("#timeonlyEndTime").val();
