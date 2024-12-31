@@ -13,7 +13,6 @@ def booking(request):
 def create_booking(request):
     if request.method == 'POST':
         try:
-            # Parse the JSON data from the request body
             data = json.loads(request.body.decode('utf-8'))
             
             customer_name = data['customer_name']
@@ -21,12 +20,10 @@ def create_booking(request):
             booking_datetime = data['booking_datetime']
             duration = data['duration']
 
-            # Convert the booking_datetime string to a datetime object
             booking_datetime = datetime.strptime(booking_datetime, '%Y-%m-%dT%H:%M')
 
             sport = Sport.objects.get(id=sport_id)
 
-            # Create the booking object
             booking = Booking.objects.create(
                 customer_name=customer_name,
                 sport=sport,
@@ -34,7 +31,6 @@ def create_booking(request):
                 duration=duration
             )
 
-            # Calculate the total price
             total_price = booking.calculate_total_price()
 
             return JsonResponse({

@@ -12,11 +12,12 @@ class Booking(models.Model):
     total_price = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
 
     def calculate_total_price(self):
-        # Get the default pricing for the sport based on duration
+        '''Calculate the total price of the booking based on the sport's pricing rules'''
+
         default_prices = self.sport.default_pricing.all()
         applicable_price = None
 
-        # Find the first applicable price based on duration
+        # Find the applicable price based on duration
         for pricing in default_prices:
             if pricing.duration >= int(self.duration):
                 applicable_price = pricing.price
@@ -26,51 +27,44 @@ class Booking(models.Model):
         if not applicable_price:
             applicable_price = default_prices.last().price
 
-        # Check for any applicable pricing overrides
-        applicable_overrides = self.sport.pricing_overrides.filter(
-            Q(date=self.booking_datetime.date()) |
-            Q(day_of_week=self.booking_datetime.isoweekday()) |
-            (Q(start_time__lte=self.booking_datetime.time()) & Q(end_time__gte=self.booking_datetime.time()))
+        # Separate the pricing overrides by type
+        applicable_overrides_datetime = self.sport.pricing_overrides.filter(
+            Q(override_type='datetime') & Q(date=self.booking_datetime.date())
+        )
+        applicable_overrides_daytime = self.sport.pricing_overrides.filter(
+            Q(override_type='daytime') & Q(day_of_week=self.booking_datetime.isoweekday())
+        )
+        applicable_overrides_timeonly = self.sport.pricing_overrides.filter(
+            Q(override_type='timeonly') & 
+            Q(start_time__lte=self.booking_datetime.time()) & 
+            Q(end_time__gte=self.booking_datetime.time())
         )
 
         price_modifier = 0
-        applied_override = None  # To track which override was applied
+        applied_override = None
 
-        for override in applicable_overrides:
-            # Apply the datetime-based override if it matches
-            if override.override_type == 'datetime' and override.date == self.booking_datetime.date():
-                price_modifier = override.price_modifier
-                applied_override = 'datetime'
-                break  # Exit as soon as a datetime override is applied
-
-        if not applied_override:
-            for override in applicable_overrides:
-                # Apply the daytime-based override if it matches
-                if override.override_type == 'daytime' and override.day_of_week == self.booking_datetime.isoweekday():
-                    price_modifier = override.price_modifier
-                    applied_override = 'daytime'
-                    break  # Exit as soon as a daytime override is applied
-
-        if not applied_override:
-            for override in applicable_overrides:
-                # Apply the timeonly-based override if it matches
-                if override.override_type == 'timeonly' and override.start_time <= self.booking_datetime.time() <= override.end_time:
-                    price_modifier = override.price_modifier
-                    applied_override = 'timeonly'
-                    break  # Exit as soon as a timeonly override is applied
-
-        # If no override was applied, use the default applicable price
-        if not applied_override:
-            price_modifier = 0  # No price modification, use base price
+        # Process overrides in hierarchical order
+        if applicable_overrides_datetime.exists():
+            override = applicable_overrides_datetime.first()
+            price_modifier = override.price_modifier
+            applied_override = 'datetime'
+        elif applicable_overrides_daytime.exists():
+            override = applicable_overrides_daytime.first()
+            price_modifier = override.price_modifier
+            applied_override = 'daytime'
+        elif applicable_overrides_timeonly.exists():
+            override = applicable_overrides_timeonly.first()
+            price_modifier = override.price_modifier
+            applied_override = 'timeonly'
 
         # Apply the price modifier to the base price
         total_price = applicable_price + price_modifier
         self.total_price = total_price
         self.save()
 
-        # Print details for debugging
         print(f"Applicable Price: {applicable_price}")
         print(f"Price Modifier: {price_modifier}")
+        print(f"Applied Override: {applied_override}")
         print(f"Total Price: {total_price}")
 
         return total_price

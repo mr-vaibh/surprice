@@ -64,7 +64,7 @@ $(document).ready(function () {
         return `<span style="color: ${color};">${sign}$${Math.abs(price).toFixed(2)}</span>`;
     }
 
-    // Create specific override rows
+    // Create specific override rows for different override types
     function createDatetimeOverrideTable(override, formattedPrice) {
         const formattedDate = new Date(override.date).toLocaleDateString();
         const startTime = new Date(`1970-01-01T${override.start_time}`).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
@@ -76,7 +76,6 @@ $(document).ready(function () {
                     <td><button class="${btnClass}" onclick="deleteOverride(${override.id})"><i class="fa-solid fa-trash"></i></button></td>
                 </tr>`;
     }
-
     function createDaytimeOverrideTable(override, formattedPrice) {
         const daysOfWeek = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
         const dayName = daysOfWeek[override.day_of_week];
@@ -89,7 +88,6 @@ $(document).ready(function () {
                     <td><button class="${btnClass}" onclick="deleteOverride(${override.id})"><i class="fa-solid fa-trash"></i></button></td>
                 </tr>`;
     }
-
     function createTimeonlyOverrideTable(override, formattedPrice) {
         const startTime = new Date(`1970-01-01T${override.start_time}`).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
         const endTime = new Date(`1970-01-01T${override.end_time}`).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
@@ -175,8 +173,6 @@ $(document).ready(function () {
         $.get(`/sports/${sportId}/`, function (data) {
             $("#sportId").val(data.id);
             $("#updateSportName").val(data.name);
-            $("#updateSportDuration").val(data.default_pricing.duration || "");
-            $("#updateSportPrice").val(data.default_pricing.price || "");
             $("#updateSportModal").removeClass("hidden");
         }).fail(() => alert("Error fetching sport details."));
     };
