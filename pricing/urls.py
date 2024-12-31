@@ -1,4 +1,5 @@
 from django.urls import path
+from django.shortcuts import redirect
 from .views import manage_pricing
 
 from rest_framework.routers import DefaultRouter
@@ -12,6 +13,7 @@ router.register(r'pricing-overrides', PricingOverrideViewSet, basename='pricing-
 
 urlpatterns = [
     path('manage-pricing/', manage_pricing, name='manage_pricing'),
+    path('', lambda request: redirect('booking')),  # Redirect root to manage-pricing
 ]
 
 urlpatterns += router.urls

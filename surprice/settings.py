@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     # Third-party apps
     'django_extensions',
     'rest_framework',
+    'drf_yasg',
 
     # User apps
     'pricing.apps.PricingConfig',
